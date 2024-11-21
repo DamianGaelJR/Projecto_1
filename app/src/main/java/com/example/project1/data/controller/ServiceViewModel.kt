@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.project1.data.model.ServiceModel
 import com.example.project1.data.network.RetrofitClient
 import kotlinx.coroutines.launch
-import okhttp3.Response
+import retrofit2.Response
 
 class ServiceViewModel : ViewModel() {
     val api = RetrofitClient.api
