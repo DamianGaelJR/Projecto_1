@@ -2,6 +2,7 @@ package com.example.project1.ui.sreens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
@@ -14,6 +15,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -32,6 +35,7 @@ import com.example.project1.R
 import com.example.project1.data.controller.ServiceViewModel
 import com.example.project1.data.model.ServiceModel
 import com.example.project1.ui.components.ServiceCard
+import com.example.project1.ui.components.ServiceDetailCard
 import com.example.project1.ui.components.TopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,6 +97,29 @@ fun HomeScreen(navController: NavController, viewModel: ServiceViewModel = viewM
                             }
                         }
                         showBottomSheet = true
+                    }
+                )
+            }
+        }
+        if (showBottomSheet) {
+            ModalBottomSheet (
+                containerColor = colorResource(R.color.borderCard),
+                contentColor = Color.Black,
+                modifier = Modifier.fillMaxHeight(),
+                onDismissRequest = {
+                    showBottomSheet = false
+                }
+            ) {
+                ServiceDetailCard(
+                    serviceDetail?.id ?: 0,
+                    serviceDetail?.name ?: "",
+                    serviceDetail?.username ?: "",
+                    serviceDetail?.password ?: "",
+                    serviceDetail?.description ?: "",
+                    serviceDetail?.imageURL ?: "",
+                    onEditClick = {
+                        showBottomSheet = false
+                        navController.navigate("manage-service/" + serviceDetail?.id)
                     }
                 )
             }
