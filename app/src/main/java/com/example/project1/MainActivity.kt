@@ -56,6 +56,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.project1.ui.sreens.Components
 import com.example.project1.ui.sreens.HomeScreen
 import com.example.project1.ui.sreens.LoginScreen
+import com.example.project1.ui.sreens.ManageServiceScreen
 import com.example.project1.ui.sreens.MenuScreen
 
 class MainActivity : ComponentActivity() {
@@ -83,5 +84,9 @@ fun SetupNavGraph(navController: NavHostController){
         composable("home") { HomeScreen(navController) }
         composable("componentes") { Components(navController)}
         composable("login") { LoginScreen(navController)}
+        composable("manage-service/{serviceId}") { backStackEntry ->
+            val serviceId = backStackEntry.arguments?.getString("serviceId")
+            ManageServiceScreen(navController, serviceId = serviceId)
+        }
     }
 }
