@@ -28,26 +28,37 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.project1.R
 import com.example.project1.data.controller.ServiceViewModel
+import com.example.project1.data.database.AppDatabase
+import com.example.project1.data.database.DatabaseProvider
+import com.example.project1.data.model.ServiceEntity
 import com.example.project1.data.model.ServiceModel
 import com.example.project1.ui.components.ServiceCard
 import com.example.project1.ui.components.ServiceDetailCard
 import com.example.project1.ui.components.TopBar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController, viewModel: ServiceViewModel = viewModel()) {
+    val db: AppDatabase = DatabaseProvider.getDatabase(LocalContext.current)
+
     var serviceDetail by remember { mutableStateOf<ServiceModel?>(null) }
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = false,
     )
     var showBottomSheet by remember { mutableStateOf(false) }
-    Scaffold(
-        topBar = { TopBar("Password Manager", navController, false) },
+
+    var services by remember { mutableStateOf<List<ServiceEntity>>(emptyList()) }
+    val serviceDao = db.serviceDao()
+
+    Scaffold(topBar = { TopBar("Password Manager", navController, false) },
         bottomBar = {
             BottomAppBar(
                 containerColor = Color.Black,
@@ -66,17 +77,11 @@ fun HomeScreen(navController: NavController, viewModel: ServiceViewModel = viewM
             }
         }
     ) { innerPadding ->
-        var services by remember { mutableStateOf<List<ServiceModel>>(emptyList()) }
-        if (services.isEmpty()) {
-            CircularProgressIndicator()
-        }
+
         LaunchedEffect(Unit) {
-            viewModel.getServices { response ->
-                if (response.isSuccessful) {
-                    services = response.body() ?: emptyList()
-                } else {
-                    println("failed to load posts")
-                }
+            services =  withContext(Dispatchers.IO) {
+                viewModel.getServices(db)
+                serviceDao.getAll()
             }
         }
 

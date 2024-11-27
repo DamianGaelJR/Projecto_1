@@ -32,8 +32,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.project1.R
 import com.example.project1.data.controller.ServiceViewModel
+import com.example.project1.data.dao.ServiceDao
+import com.example.project1.data.database.AppDatabase
+import com.example.project1.data.database.DatabaseProvider
 import com.example.project1.data.model.ServiceModel
 import com.example.project1.ui.components.TopBar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.nio.file.Files.delete
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,8 +49,11 @@ fun ManageServiceScreen(
     serviceId: String?, viewModel:
     ServiceViewModel = viewModel()
 ) {
-    val service = remember { mutableStateOf(ServiceModel()) }
+    val db: AppDatabase = DatabaseProvider.getDatabase(LocalContext.current)
+    val serviceDao = db.serviceDao()
     val context = LocalContext.current
+
+    val service = remember { mutableStateOf(ServiceModel()) }
     var bar_title by remember { mutableStateOf("Create new Service") }
 
     if (serviceId != null && serviceId != "0") {
@@ -193,7 +202,8 @@ fun ManageServiceScreen(
                         viewModel,
                         context,
                         serviceId,
-                        navController
+                        navController,
+                        serviceDao
                     )
                 }) { Text("DELETE") }
         }
@@ -228,11 +238,16 @@ fun delete(
     viewModel: ServiceViewModel,
     context: Context,
     serviceId: String?,
-    navController: NavController
+    navController: NavController,
+    serviceDao: ServiceDao
 ) {
     if (serviceId != null && serviceId != "0") {
         viewModel.deleteService(serviceId.toInt()) { response ->
             if (response.isSuccessful) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    val service = serviceDao.show(serviceId.toInt())
+                    serviceDao.delete(service)
+                }
                 Toast.makeText(context, "Service deleted successfully", Toast.LENGTH_SHORT)
                     .show()
                 navController.popBackStack()
