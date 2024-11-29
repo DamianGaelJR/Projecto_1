@@ -4,6 +4,8 @@ import com.example.project1.data.model.ServiceModel
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -24,4 +26,16 @@ interface ApiService {
 
     @DELETE("service/{id}")
     suspend fun deleteService(@Path("id") id: Int): Response<ServiceModel>
+
+    @FormUrlEncoded
+    @POST("user")
+    suspend fun loginUser(
+        @Field("username") username: String,
+        @Field("password") password: String
+    ): Response<LoginResponse>
 }
+
+data class LoginResponse(
+    val token: String,
+    val message: String?
+)
